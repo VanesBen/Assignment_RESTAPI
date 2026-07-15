@@ -45,6 +45,6 @@ trait ApiResponse
             'success' => false,
             'message' => $message,
             'errors' => $errors,
-        ], 422);
+        ], 401);
     }
 }

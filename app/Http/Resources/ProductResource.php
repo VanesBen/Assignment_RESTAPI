@@ -16,15 +16,16 @@ class ProductResource extends JsonResource
     {
         return [
             "id" => $this->id,
+            "seller_id" => $this->seller_id,
+            'category_id' => $this->category_id, 
             'title' => $this->title, 
             'description' => $this->description, 
             'price' => $this->price, 
             'rating' => $this->rating, 
-            'category_id' => $this->category_id, 
             'file_path' => $this->file_path, 
             'download_count' => $this->download_count,
             'thumbnail' => $this->thumbnail, 
-            'status' => $this->status 
+            'status' => $this->status
         ];
     }
 }

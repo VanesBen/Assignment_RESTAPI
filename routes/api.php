@@ -17,35 +17,46 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::prefix('/auth')->group(function() {
+    Route::get('/', [AuthController::class, 'index']);
+    Route::get('/{user}', [AuthController::class, 'show']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
+Route::middleware('auth:sanctum')->group(function () {
+    // Categories
+    Route::post('/categories',[ProductCategoryController::class, 'store']);
+    Route::put('/categories/{category}',[ProductCategoryController::class, 'update']);
+    Route::delete('/categories/{category}',[ProductCategoryController::class, 'destroy']);
+
+    
+    // product
+    //create item
+    Route::post('/products', [ProductController::class, 'store'])
+        ->middleware('role:seller');
+    //update
+    Route::put('/products/{product}', [ProductController::class, 'update'])
+        ->middleware('role:seller');
+    //delete item
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])
+        ->middleware('role:seller');
+
+});
+
+
+// PRODUCT
 Route::get('products/search/{name}', [ProductController::class, 'search']);
-Route::apiResource('categories', ProductCategoryController::class);
-
-// PRODUCTS
+Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
-//create item
-Route::post('/products', [ProductController::class, 'store'])
-    ->middleware(['auth:sanctum', 'role:seller']);;
-// show itme
-Route::post('/products/{product}', [ProductController::class, 'show']);
-//update item
-Route::put('/products/{product}', [ProductController::class, 'update'])
-    ->middleware(['auth:sanctum', 'role:seller,owner']);
 
-//delete item
-Route::delete('/products/{product}', [ProductController::class, 'destroy'])
-    ->middleware(['auth:sanctum', 'role:seller,owner']);
+// CATEGORIES
+Route::get('/categories', [ProductCategoryController::class, 'index']);
 
-// Route::apiResource('products', ProductController::class);
+
+
+
 
 
 

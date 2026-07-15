@@ -32,7 +32,7 @@ class ProductCategoryController extends Controller
 
 
     public function show(int $id) {
-        $product_category = ProductCategory::findOrFail($id);
+        $product_category = ProductCategory::with('products')->find($id);
 
         if(!$product_category) {
             return $this->notFoundResponse("Produk tidak ditemukan");
@@ -68,9 +68,16 @@ class ProductCategoryController extends Controller
         if(!$product_category) {
             return $this->notFoundResponse("Produk tidak ditemukan");
         } else {
+
+            if($product_category->products()->exists()) {
+                return $this->errorResponse("Tidak bisa dihapus karena kategori ini memiliki produk");
+            }
+
             $product_category->delete();
             return $this->successResponse(message: "Produk Berhasil Dihapus");
         }
+
+        
     }
 
 

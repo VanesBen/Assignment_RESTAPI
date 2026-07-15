@@ -2,32 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ApiResponse;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+    public function index() {
+        $users = User::all();
+        return $this->successResponse($users);
+    }
+
+    public function show($id): JsonResponse
+    {
+        $user = User::findOrFail($id); 
+
+        return $this->successResponse($user);
+    }
     public function register(Request $request){
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|in:seller,buyer,owner',
+            'role' => 'required|string|in:seller,buyer,admin',
+            'balance' => 'required|integer|min:0',
             'password' => 'required|string|min:6|confirmed'
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'role' => $validated['role'],
+            'balance' => $validated['balance'],
             'password' => Hash::make($validated['password'])
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
-        return response()->json([
-            'message' => "Registrasi berhasil",
+        return $this->successResponse([
             'user' => $user,
             'token' => $token
-        ]);
+        ],"Registrasi Berhasil");
     }
 
     public function login(Request $request) {
@@ -37,31 +53,21 @@ class AuthController extends Controller
         ]);
 
         $user  = User::where('email', $validated['email'])->first();
-        // $passwordValid = ;
 
         if(!$user || !Hash::check($validated['password'], $user->password)) {
-            return response()->json([
-                'message' => "email atau password salah"
-            ], 401);
+            return  $this->validationErrorResponse("email atau password salah");
         }
 
-
-        //generate lgoin
         $token = $user->createToken('auth-token')->plainTextToken;
-        return response()->json([
-            'message' => "Login Berhasil",
+        return $this->successResponse([
             'user' => $user,
             'token' => $token
-        ]);
-
+        ],"Login Berhasil");
 
     }
 
-
     public function logout(Request $request) {
         $request->user()->currentAccessToken()->delete();
-        return response()->json([
-            'message' => "Logut Berhasil"
-        ]);
+        return $this->successResponse(message:"Logout Berhasil");
     }
 }
