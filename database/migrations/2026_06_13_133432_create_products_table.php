@@ -21,7 +21,7 @@ class CreateProductsTable extends Migration
             $table->text('description');
             $table->integer('price');
             $table->decimal('rating', 3,1);
-            $table->string('thumbnail')->nullable();
+            $table->longText('thumbnail')->nullable();
             $table->string('file_path');
             $table->string('download_count');
             $table->string('status');

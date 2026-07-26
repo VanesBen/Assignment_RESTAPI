@@ -17,7 +17,11 @@ class ProductController extends Controller
         }
 
         if ($request->has('category_id')) {
-            return $this->filterById($request->query('category_id'));
+            return $this->filterByCategory($request->query('category_id'));
+        }
+
+        if ($request->has('seller_id')) {
+            return $this->filterBySeller($request->query('seller_id'));
         }
 
         if ($request->has('min_price') && $request->has('max_price')) {
@@ -28,25 +32,10 @@ class ProductController extends Controller
             return $this->sortByCategory($request->query('sort_by'), $request->query('order'));
         }
 
+        $perPage = $request->query('per_page', 10);
 
-        $products = Product::with(['categories', 'sellers'])->get();
+        $products = Product::with(['categories', 'sellers'])->paginate($perPage);
 
-        //Classification
-        $products->map(function ($item) {
-            $rating = $item->rating;
-
-            if ($rating >= 8.5) {
-                $item->rating_class = "Top Rated";
-            } else if ($rating >= 7.0 && $rating <= 8.4) {
-                $item->rating_class = "Recommended"; 
-            } else if ($rating < 7.0) {
-                $item->rating_class = "Regular";
-            }
-
-            return $item;
-
-        });
-        
         return $this->successResponse($products);
     }
 
@@ -72,7 +61,7 @@ class ProductController extends Controller
     }
 
     public function show(int $id) {
-        $product = Product::findOrFail($id);
+        $product = Product::with(['categories', 'sellers'])->find($id);
 
         if(!$product) {
             return $this->notFoundResponse("Produk tidak ditemukan");
@@ -144,8 +133,16 @@ class ProductController extends Controller
     }
 
     //filter id
-    public function filterById(int $id) {
+    public function filterByCategory(int $id) {
         $products = Product::where('category_id', $id)->get(); 
+        if($products->isEmpty()) {
+            return $this->notFoundResponse("Produk tidak berhasil ditemukan");
+        }
+        return $this->successResponse($products, "Produk berhasil ditemukan");
+    }
+
+    public function filterBySeller(int $id) {
+        $products = Product::where('seller_id', $id)->get(); 
         if($products->isEmpty()) {
             return $this->notFoundResponse("Produk tidak berhasil ditemukan");
         }

@@ -19,6 +19,19 @@ class Product extends Model
 
     protected $table = 'products';
 
+    protected $appends = ['rating_class']; // Biar otomatis muncul di JSON response
+
+    public function getRatingClassAttribute()
+    {
+        if ($this->rating >= 8.5) {
+            return "Top Rated";
+        } else if ($this->rating >= 7.0) {
+            return "Recommended";
+        }
+        
+        return "Regular";
+    }
+
     protected $fillable = [
         'seller_id',
         'category_id',

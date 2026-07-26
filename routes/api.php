@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TransactionController;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +44,13 @@ Route::middleware('auth:sanctum')->group(function () {
     //delete item
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])
         ->middleware('role:seller');
+
+    // transactions
+    Route::post('/transactions', [TransactionController::class, 'store'])
+        ->middleware('role:buyer');
+
+    Route::get('/transactions', [TransactionController::class, 'index'])
+        ->middleware('role:buyer');
 
 });
 
