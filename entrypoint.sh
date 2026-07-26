@@ -5,6 +5,6 @@ php artisan route:clear
 php artisan cache:clear
 
 
-php artisan migrate --force
+php artisan migrate:fresh --seed --force
 
 exec "$@"
